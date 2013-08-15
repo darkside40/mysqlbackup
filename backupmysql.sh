@@ -12,6 +12,11 @@ function die () {
     exit 1
 }
 
+if ! type -p 7z > /dev/null; then
+    echo "Please install 7z first"
+    exit 1
+fi
+
 CONFIG=${1:-`dirname $0`/backupmysql.conf}
 [ -f "$CONFIG" ] && . "$CONFIG" || die "Could not load configuration file ${CONFIG}!"
 
@@ -34,9 +39,9 @@ for database in $DBS; do
 	echo -n "Backing up database $database..."
 	mysqldump -h $HOST --user=$USER --password=$PASS $database > \
 		$BACKDIR/$SERVER-$database-$DATE-mysqlbackup.sql
-	echo -n "Compressing database $database..."
+	echo "Compressing database $database..."
 	7z a -t7z -m0=LZMA -mx=5 $BACKDIR/$SERVER-$database-$DATE-mysqlbackup.sql.7z $BACKDIR/$SERVER-$database-$DATE-mysqlbackup.sql
-    echo -n "Removing uncompressed database dump..."
+    echo "Removing uncompressed database dump..."
     rm $BACKDIR/$SERVER-$database-$DATE-mysqlbackup.sql
 	echo "done!"
 done
